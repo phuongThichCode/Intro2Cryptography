@@ -1,0 +1,51 @@
+DIFFIE-HELLMAN KEY EXCHANGE - USAGE GUIDE
+=========================================
+
+FILES INCLUDED:
+- main.cpp      : Main implementation with all required functions
+- BigInt.h      : BigInteger header file
+- BigInt.cpp    : BigInteger implementation
+- fft.h         : Fast Fourier Transform header (used by BigInt)
+- fft.cpp       : Fast Fourier Transform implementation
+
+COMPILATION:
+------------
+g++ -std=c++14 -o diffie_hellman main.cpp BigInt.cpp fft.cpp
+
+RUNNING THE PROGRAM:
+-------------------
+
+Option 1: Interactive Menu (Run without arguments)
+./diffie_hellman
+
+You'll see a menu:
+  1. 64-bit   (fast, ~1-3 minutes)
+  2. 128-bit  (moderate, ~3-5 minutes)
+  3. 256-bit  (slower, ~5-15 minutes)
+  4. 512-bit  (REQUIRED for submission, ~10-30 minutes)
+
+Option 2: Command-Line Argument
+./diffie_hellman 64      # Fast testing
+./diffie_hellman 128     # Moderate testing
+./diffie_hellman 256     # Slower testing
+./diffie_hellman 512     # Required for final submission
+
+TESTING RECOMMENDATIONS:
+-----------------------
+- Use 64-bit or 128-bit for quick testing and debugging
+- Use 512-bit for final submission and demonstration
+- The 512-bit version is REQUIRED by the assignment
+
+WHAT THE PROGRAM DOES:
+----------------------
+1. Generates a safe prime p (where both p and (p-1)/2 are prime)
+2. Generates private keys for Alice and Bob
+3. Computes public keys using modular exponentiation
+4. Exchanges public keys and computes shared secrets
+5. Verifies that both shared secrets match
+
+NOTE:
+-----
+Safe prime generation is intentionally slow because safe primes are rare.
+This is normal and expected behavior for cryptographic prime generation.
+
