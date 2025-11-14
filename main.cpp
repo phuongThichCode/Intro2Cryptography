@@ -12,23 +12,74 @@
 using namespace std;
 
 // A: Modular exponentiation function
-// Computes (base^exponent) % mod efficiently using binary exponentiation
+// Computes (base^exponent) % mod efficiently using binary exponentiation + sliding window
 // This handles large numbers using BigInt for 512+ bit arithmetic
-BigInt modular_exponentiation(BigInt base, BigInt exponent, BigInt mod) {
-    BigInt result = 1;
-    base = base % mod;
-    
-    // Binary exponentiation algorithm
-    while (exponent > 0) {
-        // If exponent is odd, multiply base with result
-        if (exponent % 2 == 1) {
-            result = (result * base) % mod;
+BigInt modular_exponentiation(BigInt base, BigInt exponent,const BigInt& mod) {
+    // Special cases
+    if (mod == 1) return BigInt(0);
+    if (exponent.isZero()) return BigInt(1) % mod;
+
+    // Ensure base is within mod
+    base %= mod;
+    if (base.isZero()) return BigInt(0);
+
+    // Convert exponent to binary representation, then store reversed bits in a vector
+    std::vector<int> bits;
+    {
+        BigInt e = exponent;
+        while (!e.isZero()) {
+            int bit = e % 2;
+            bits.push_back(bit);
+            e /= 2;
         }
-        // Square the base and halve the exponent
-        exponent = exponent / 2;
-        base = (base * base) % mod;
+        if (bits.empty()) {
+            bits.push_back(0);
+        }
     }
-    
+
+    const int W = 4; //Optimal window size
+    const int MAX_ODD = (1 << W);    // 2^W
+    std::vector<BigInt> pre(MAX_ODD); // Precomputed a^u for odd u
+
+    pre[1] = base;
+    BigInt base2 = (base * base) % mod;
+    for (int e = 3; e < MAX_ODD; e += 2) {
+        pre[e] = (pre[e - 2] * base2) % mod;
+    }
+
+    BigInt result = 1;
+    int i = (int)bits.size() - 1;   // index bit cao nhất
+
+    // Compute result using sliding window
+    while (i >= 0) {
+        if (bits[i] == 0) {
+            result = (result * result) % mod;
+            --i;
+        }
+        else {
+            int l = std::max(0, i - W + 1);
+            int j = l;
+
+            while (j < i && bits[j] == 0) {
+                ++j;
+            }
+            int length = i - j + 1;
+
+            int u = 0;
+            for (int k = i; k >= j; --k) {
+                u = (u << 1) | bits[k];
+            }
+
+            for (int k = 0; k < length; ++k) {
+                result = (result * result) % mod;
+            }
+
+            result = (result * pre[u]) % mod;
+
+            i = j - 1;
+        }
+    }
+
     return result;
 }
 
